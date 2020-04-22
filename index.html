@@ -1,61 +1,98 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Othello - Théorie des jeux</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="script.js"></script>
-</head>
-<body>
-    <h1 class="centered">Othello</h1>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Othello - Théorie des jeux</title>
+		<link rel="stylesheet" href="style.css" />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="script.js"></script>
+	</head>
+	<body>
+		<h1 class="centered">Othello</h1>
 
-    <div id="welcomediv">
-        <form id="formstart" method="post" action="?">
-            <div>
-                <fieldset>
-                    <legend>Mode de jeu</legend>
+		<div id="welcomediv">
+			<form id="formstart" method="post" action="?">
+				<div>
+					<fieldset>
+						<legend>Mode de jeu</legend>
 
-                    <input type="radio" id="jvsj" name="mode" value="jvsj" checked>
-                    <label for="jvsj">Joueur vs Joueur</label><br>
-                    <input type="radio" id="jvsia" name="mode" value="jvsia">
-                    <label for="jvsia">Joueur vs IA</label><br>
-                    <input type="radio" id="iavsia" name="mode" value="iavsia">
-                    <label for="iavsia">IA vs IA</label><br>
-                </fieldset>
-            </div>
+						<input
+							type="radio"
+							id="jvsj"
+							name="mode"
+							value="jvsj"
+							checked
+						/>
+						<label for="jvsj">Joueur vs Joueur</label><br />
+						<input
+							type="radio"
+							id="jvsia"
+							name="mode"
+							value="jvsia"
+						/>
+						<label for="jvsia">Joueur vs IA</label><br />
+						<input
+							type="radio"
+							id="iavsia"
+							name="mode"
+							value="iavsia"
+						/>
+						<label for="iavsia">IA vs IA</label><br />
+					</fieldset>
+				</div>
 
-            <div id="diff" class="hidden">
-                <fieldset>
-                    <legend>Difficulté</legend>
+				<div id="diff" class="hidden">
+					<fieldset>
+						<legend>Difficulté</legend>
 
-                    <input type="radio" id="easy" name="difficulte" value="easy" checked>
-                    <label for="easy">Novice</label><br>
-                    <input type="radio" id="medium" name="difficulte" value="medium">
-                    <label for="medium">Moyen</label><br>
-                    <input type="radio" id="hard" name="difficulte" value="hard">
-                    <label for="hard">Expérimenté</label><br>
-                </fieldset>
-            </div>
-            <br>
-            <button id="submit" type="submit">Jouer</button>
-        </form>
-    </div>
+						<input
+							type="radio"
+							id="easy"
+							name="difficulte"
+							value="easy"
+							checked
+						/>
+						<label for="easy">Novice</label><br />
+						<input
+							type="radio"
+							id="medium"
+							name="difficulte"
+							value="medium"
+						/>
+						<label for="medium">Moyen</label><br />
+						<input
+							type="radio"
+							id="hard"
+							name="difficulte"
+							value="hard"
+						/>
+						<label for="hard">Expérimenté</label><br />
+					</fieldset>
+				</div>
+				<br />
+				<button id="submit" type="submit">Jouer</button>
+			</form>
+		</div>
 
-    <div id="game" class="hidden centered">
+		<div id="game" class="hidden centered">
+			<div id="board">
+				<div id="panelInfo">
+					<p><b>Informations de la partie</b></p>
+					<p>Joueur actuel : <span id="currentPlayer"></span></p>
+					<p>Temps restant : <span id="timer">20 sec</span></p>
+					<p>
+						Nombre de pions du joueur noir :
+						<span id="nbBlackPieces"></span>
+					</p>
+					<p>
+						Nombre de pions du joueur blanc :
+						<span id="nbWhitePieces"></span>
+					</p>
+				</div>
 
-        <div id="board">
-            <div id="panelInfo">
-                <p><b>Informations de la partie</b></p>
-                <p>Joueur actuel : <span id="currentPlayer"></span></p>
-                <p>Temps restant : <span id="timer">20 sec</span></p>
-                <p>Nombre de pions du joueur noir : <span id="nbBlackPieces"></span></p>
-                <p>Nombre de pions du joueur blanc : <span id="nbWhitePieces"></span></p>
-            </div>
-
-            <table id="plateau" cellpadding="0" cellspacing="0"></table>
-        </div>
-    </div>
-</body>
+				<table id="plateau" cellpadding="0" cellspacing="0"></table>
+			</div>
+		</div>
+	</body>
 </html>
