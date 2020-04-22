@@ -335,8 +335,12 @@
     function makeMove(moveKey, isIA) {
         let coords = moveKey.split('x');
 
-        for (let i = 0; i < possibleMoves[moveKey].length; i++) {
+        /*for (let i = 0; i < possibleMoves[moveKey].length; i++) {
             virtualBoard[possibleMoves[moveKey][i].row][possibleMoves[moveKey][i].col] = currentPlayer;
+        }*/
+
+        for (let move of possibleMoves[moveKey]){
+            virtualBoard[move.row][move.col] = currentPlayer;
         }
 
         // Ajout du pion sur la case cliquée
