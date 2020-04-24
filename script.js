@@ -1,25 +1,26 @@
 (function ($) {
-    const BOARD_SIZE = 8;
-    const SEC_TIMER = 10;
+    const BOARD_SIZE = 8,  // Dimension du plateau
+          SEC_TIMER = 10;  // Temps initial du timer
 
-    let $plateau;                     // Element plateau
-    let gameMode;                     // Mode de jeu
-    let gameOver;                     // La partie est finie ?
-    let currentPlayer;                // Joueur courant (noir | blanc)
-    let possibleMoves;                // Ensemble des déplacements possibles
-    let sec;                          // Temps restant pour le tour actuel
-    let nbBlackPieces, nbWhitePieces; // Nombre de pions respectivement noirs et blancs
-    let timer;                        // Timer pour la rotation des tours
-    let timeout;
-    let playerCanClick;
+    let $plateau,                     // Element plateau
+        gameMode,                     // Mode de jeu
+        gameOver,                     // La partie est finie ?
+        currentPlayer,                // Joueur courant (noir | blanc)
+        possibleMoves,                // Ensemble des déplacements possibles
+        sec,                          // Temps restant pour le tour actuel
+        nbBlackPieces, nbWhitePieces, // Nombre de pions respectivement noirs et blancs
+        timer,                        // Timer pour la rotation des tours
+        timeout,
+        playerCanClick;
 
-    let virtualBoard; // Plateau virtuel (graphe)
-    let difficulty;   // Niveau de difficulté des IA
-    let currentIA;    // IA en train de jouer (noir | blanc)
-    let openAI;
+    let virtualBoard, // Plateau virtuel (graphe)
+        difficulty,   // Niveau de difficulté des IA
+        currentIA,    // IA en train de jouer (noir | blanc)
+        openAI,
+        bestMoveAI;   // Meilleur déplacement possible pour l'IA en train de jouer
 
     // Page chargée
-    $(document).ready(function () {
+    $(document).ready(() => {
         $plateau = $('table#plateau');
         gameOver = false;
         currentPlayer = 'noir';
@@ -27,7 +28,7 @@
         sec = SEC_TIMER;
 
         // Gestion du formulaire de paramétrage
-        $('input[name="mode"]').on('change', function (e) {
+        $('input[name="mode"]').on('change', e => {
             let $divDif = $('#diff');
             if (e.target.value.includes("ia")) {
                 $divDif.removeClass('hidden');
@@ -37,7 +38,7 @@
         });
 
         // Appuie sur le bouton Jouer (Initialisations)
-        $('#formstart').submit(function (event) {
+        $('#formstart').submit(event => {
             gameMode = $('input[name=mode]:checked').val();
             difficulty = $('input[name=difficulte]:checked').val();
 
@@ -59,7 +60,7 @@
                 currentIA = 'noir';
                 playerCanClick = false;
 
-                timeout = setTimeout(function () {
+                timeout = setTimeout(() => {
                     //console.log("START IA");
                     AIPlay();
                 }, 2000);
@@ -72,9 +73,9 @@
 
     // Initialisation du timer
     function initTimer(){
-        return setInterval(function() {
-            $('#timer').text(sec + " sec");
+        return setInterval(() => {
             sec--;
+            $('#timer').text(sec + " sec");
 
             if (sec < 0) {
                 sec = SEC_TIMER;
@@ -380,6 +381,7 @@
         if (id in possibleMoves){
             // Application du déplacement
             makeMove(id, false);
+            sec = SEC_TIMER;
 
             // MAJ de la vue
             updateBoardView();
@@ -388,15 +390,18 @@
             // Vérification de la fin de partie
             if (gameOver) endGame();
 
-            sec = SEC_TIMER;
+            // Reset du timer
+            //clearInterval(timer);
+            //timer = initTimer();
         }
     }
 
     // Action d'une IA
     function AIPlay(){
-        //console.log("AI");
         clearTimeout(timeout);
         timeout = null;
+
+        bestMoveAI = "";
 
         // Gère l'accès à cette même méthode
         openAI = false;
@@ -404,15 +409,23 @@
         // Application d'algorithme de recherche en fonction de la difficulté
         let result;
         if (difficulty === 'easy') {
-            result = randomMove();
+            bestMoveAI = randomMove();
         } else if (difficulty === 'medium'){
             result = minimax(1, 'MAX');
+            //result = alphaBeta(1, -Infinity, Infinity, "MAX");
+            //result = negAlphaBeta(1, -Infinity, Infinity);
         } else {
-            result = minimax(3, 'MAX');
+            //result = minimax(3, 'MAX');
+            result = alphaBeta(5, -Infinity, Infinity, "MAX");
+            //result = negAlphaBeta(3, -Infinity, Infinity);
         }
 
+        console.log("bestMove : " + bestMoveAI);
+        //console.log("bestMove : " + result.move);
+
         // Exécution d'un click correspondant au déplacement obtenu
-        executeClick(result.move);
+        //executeClick(result.move);
+        executeClick(bestMoveAI);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -460,6 +473,7 @@
         }
 
         $('#currentPlayer').text(currentPlayer);
+        $('#timer').text(sec + " sec");
     }
 
     // Actualise le nombre de pions blancs et noirs du graphe
@@ -480,13 +494,14 @@
     // Fonction de recherche de solution pour une IA niveau débutante (position aléatoire)
     function randomMove() {
         let random = Math.floor(Math.random() * (Object.keys(possibleMoves).length));
-        return {move: Object.keys(possibleMoves)[random]};
+        return Object.keys(possibleMoves)[random];
     }
 
     // Fonction minimax remaniée
     function minimax(depth, node){
         if (gameOver || depth === 0){
-            return currentIA === 'noir' ? {score: nbBlackPieces, move: null} : {score: nbWhitePieces, move: null};
+            //return currentIA === 'noir' ? {score: nbBlackPieces, move: null} : {score: nbWhitePieces, move: null}; // Heuristique 1 (IA maximise ses gain alors que l'adversaire les minimise)
+            return currentIA === 'noir' ? nbBlackPieces : nbWhitePieces; // Heuristique 1 (IA maximise ses gain alors que l'adversaire les minimise)
         }
 
         let initialState = JSON.parse(JSON.stringify(virtualBoard));
@@ -502,11 +517,15 @@
 
             for (let m in initialPMoves){
                 if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
-                let res = minimax(depth - 1, 'MIN');
+                let score = minimax(depth - 1, 'MIN');
                 unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
 
-                if (res.score > bestScore){
-                    bestScore = res.score;
+                /*if (score.score > bestScore){
+                    bestScore = score.score;
+                    bestMove = m;
+                }*/
+                if (score > bestScore){
+                    bestScore = score;
                     bestMove = m;
                 }
             }
@@ -515,17 +534,124 @@
 
             for (let m in initialPMoves) {
                 if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
-                let res = minimax(depth - 1, 'MAX');
+                let score = minimax(depth - 1, 'MAX');
                 unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
 
-                if (res.score < bestScore) {
-                    bestScore = res.score;
+                /*if (score.score < bestScore) {
+                    bestScore = score.score;
+                    bestMove = m;
+                }*/
+
+                if (score < bestScore){
+                    bestScore = score;
                     bestMove = m;
                 }
             }
         }
 
-        return {score: bestScore, move: bestMove};
+        bestMoveAI = bestMove;
+
+        return bestScore;
+        //return {score: bestScore, move: bestMove};
+    }
+
+    // Fonction AlphaBeta remaniée
+    function alphaBeta(depth, alpha, beta, node){
+        if (gameOver || depth <= 0){
+            //return currentIA === 'noir' ? {score: nbBlackPieces, move: null} : {score: nbWhitePieces, move: null};
+            return currentIA === 'noir' ? nbBlackPieces : nbWhitePieces;
+        }
+
+        let initialState = JSON.parse(JSON.stringify(virtualBoard));
+        let initialPMoves = JSON.parse(JSON.stringify(possibleMoves));
+        let initialGameOver = gameOver;
+        let initialPlayer = currentPlayer;
+
+        let bestMove;  // Meilleur déplacement obtenu correspondant
+
+        if (node === 'MAX'){
+            for (let m in initialPMoves){
+                if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
+                let score = alphaBeta(depth - 1, alpha, beta, 'MIN');
+                unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
+
+                /*if (score.score > alpha){
+                    alpha = score.score;
+                    bestMove = m;
+
+                    if (alpha >= beta) break;
+                }*/
+                if (score > alpha) {
+                    alpha = score;
+                    bestMove = m;
+
+                    if (alpha >= beta) break;
+                }
+            }
+
+            bestMoveAI = bestMove;
+
+            //return {score: alpha, move: bestMove};
+            return alpha;
+        } else {
+            for (let m in initialPMoves) {
+                if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
+                let score = alphaBeta(depth - 1, alpha, beta, 'MAX');
+                unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
+
+                /*if (score.score < beta) {
+                    beta = score.score;
+                    bestMove = m;
+
+                    if (alpha >= beta) break;
+                }*/
+                if (score < beta) {
+                    beta = score;
+                    bestMove = m;
+
+                    if (alpha >= beta) break;
+                }
+            }
+
+            bestMoveAI = bestMove;
+
+            //return {score: beta, move: bestMove};
+            return beta;
+        }
+    }
+
+    // Fonction alphabeta version NegaMax
+    function negAlphaBeta(depth, alpha, beta){
+        if (gameOver || depth <= 0){
+            //return currentIA === 'noir' ? {score: nbBlackPieces, move: null} : {score: nbWhitePieces, move: null};
+            return currentIA === 'noir' ? nbBlackPieces : nbWhitePieces;
+        }
+
+        let initialState = JSON.parse(JSON.stringify(virtualBoard));
+        let initialPMoves = JSON.parse(JSON.stringify(possibleMoves));
+        let initialGameOver = gameOver;
+        let initialPlayer = currentPlayer;
+
+        let bestMove;  // Meilleur déplacement obtenu correspondant
+
+        for (let m in initialPMoves) {
+            if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
+            let score = -negAlphaBeta(depth - 1, -beta, -alpha);
+            console.log("score = " + score);
+            unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
+
+            if (score >= alpha) {
+                alpha = score;
+                bestMove = m;
+
+                if (alpha >= beta) break;
+            }
+        }
+
+        bestMoveAI = bestMove;
+
+        //return {score: alpha, move: bestMove};
+        return alpha;
     }
 
 })(jQuery);
