@@ -125,7 +125,6 @@ function negAlphaBeta(depth, alpha, beta){
     for (let m in initialPMoves) {
         if (initialPMoves.hasOwnProperty(m)) makeMove(m, true);
         let score = -negAlphaBeta(depth - 1, -beta, -alpha);
-        console.log("score = " + score);
         unmakeMove(initialState, initialPMoves, initialGameOver, initialPlayer);
 
         if (score >= alpha) {
