@@ -15,6 +15,10 @@ let $plateau,                     // Element plateau
 // Variables concernant les IA
 let virtualBoard,      // Plateau virtuel (graphe)
     difficulty,        // Niveau de difficulté des IA
+    algorithm1,        // Algorithme utilisé pour l'ia 1
+    algorithm2,        // Algorithme utilisé pour l'ia 2
+    heuristique1,      // Heuristique utilisé pour l'ia 1
+    heuristique2,      // Heuristique utilisé pour l'ia 2
     currentIA,         // IA en train de jouer (noir | blanc)
     openAI,
     moveAI,            // Meilleur déplacement possible pour l'IA en train de jouer
@@ -23,8 +27,9 @@ let virtualBoard,      // Plateau virtuel (graphe)
 
 
 (function ($) {
-    // Page chargée
+    // Fonction exécutée lorsque la page est chargée
     $(document).ready(() => {
+        // Initialisation des variables de départ
         $plateau = $('table#plateau');
         gameOver = false;
         currentPlayer = 'noir';
@@ -33,20 +38,81 @@ let virtualBoard,      // Plateau virtuel (graphe)
         nbBlackPieces = 2;
         nbWhitePieces = 2;
 
-        // Gestion du formulaire de paramétrage
+        // Gestion des modes de jeu
+        // En fonction du mode de jeu choisi, le formulaire change pour afficher les choix correspondant aux modes
         $('input[name="mode"]').on('change', e => {
-            let $divDif = $('#diff');
-            if (e.target.value.includes("ia")) {
-                $divDif.removeClass('hidden');
+            let $diff = $('#diff');
+            let $algojvsia = $('#algojvsia');
+            let $algoiavsia = $('#algoiavsia');
+
+            // Si le mode de jeu est Joueur contre IA, on affiche le choix de difficulté
+            if (e.target.value === 'jvsia') {
+                $diff.removeClass('hidden');
+                // Si la difficulté est autre chose que facile, on affiche les paramètres de l'IA
+                if ($('input[name=difficulte]:checked').val() !== 'easy') {
+                    $algojvsia.removeClass('hidden');
+                    $algoiavsia.addClass('hidden');
+                } else $algojvsia.addClass('hidden');
+            // Sinon si le mode de jeu est IA contre IA, on affiche le choix de difficulté
+            } else if(e.target.value === 'iavsia') {
+                $diff.removeClass('hidden');
+                // Si la difficulté est autre chose que facile, on affiche les paramètres des IA
+                if ($('input[name=difficulte]:checked').val() !== 'easy') {
+                    $algoiavsia.removeClass('hidden');
+                    $algojvsia.addClass('hidden');
+                } else $algoiavsia.addClass('hidden');
+            // Sinon on n'affiche pas les difficultés ni le paramétrage d'IA
             } else {
-                $divDif.addClass('hidden');
+                $diff.addClass('hidden');
+                $algoiavsia.addClass('hidden');
+                $algojvsia.addClass('hidden');
             }
         });
 
-        // Appuie sur le bouton Jouer (Initialisations)
+        // Gestion des difficultés
+        // De même ici en fonction de la difficulté choisie, le formulaire change pour afficher les choix correspondants
+        $('input[name="difficulte"]').on('change', e => {
+            let $algojvsia = $('#algojvsia');
+            let $algoiavsia = $('#algoiavsia');
+            let $mode = $('input[name="mode"]:checked');
+
+            // Si la difficulté choisie est autre chose que facile
+            if (!e.target.value.includes("easy")){
+                // Si le mode de jeu est Joueur contre IA
+                if ($mode.val() === 'jvsia') {
+                    $algojvsia.removeClass('hidden');
+                    $algoiavsia.addClass('hidden');
+                // Sinon si le mode de jeu est IA contre IA
+                } else if ($mode.val() === 'iavsia') {
+                    $algoiavsia.removeClass('hidden');
+                    $algojvsia.addClass('hidden');
+                } else {
+                    $algojvsia.addClass('hidden');
+                    $algoiavsia.addClass('hidden');
+                }
+            } else {
+                $algojvsia.addClass('hidden');
+                $algoiavsia.addClass('hidden');
+            }
+        });
+
+        // Appuie sur le bouton Jouer
+        // On initialise les variables restantes, utiles pour la suite comme le mode de jeu, la difficulté, les algos, etc
         $('#formstart').submit(event => {
             gameMode = $('input[name=mode]:checked').val();
             difficulty = $('input[name=difficulte]:checked').val();
+
+            // Si le mode de jeu est Joueur contre IA
+            if (!$('#algojvsia').hasClass('hidden')) {
+                algorithm1 = $('input[name="algorithme"]:checked').val();
+                heuristique1 = $('input[name="heuristique"]:checked').val();
+            // Sinon si le mode de jeu est IA contre IA
+            } else if (!$('#algoiavsia').hasClass('hidden')) {
+                algorithm1 = $('input[name="algorithmeia1"]:checked').val();
+                heuristique1 = $('input[name="heuristiqueia1"]:checked').val();
+                algorithm2 = $('input[name="algorithmeia2"]:checked').val();
+                heuristique2 = $('input[name="heuristiqueia2"]:checked').val();
+            }
 
             $('#welcomediv').addClass('hidden');
             $('#game').removeClass('hidden');
@@ -58,31 +124,35 @@ let virtualBoard,      // Plateau virtuel (graphe)
             timer = initTimer();  // Initialisation du timer
 
             // Gestion des IA
+            // Si le mode de jeu est Joueur contre Joueur, on doit pouvoir cliquer directement
             if (gameMode === 'jvsj') playerCanClick = true;
+            // Sinon si le mode de jeu est Joueur contre IA, on sait que l'IA est BLANC et le joueur doit pouvoir cliquer directement
             else if (gameMode === 'jvsia') {
                 currentIA = 'blanc';
                 playerCanClick = true;
+            // Sinon on définit l'IA courante comme étant NOIRE, on empêche l'utilisateur de cliquer et on démarre l'IA
             } else {
                 currentIA = 'noir';
                 playerCanClick = false;
 
+                // On démarre l'IA après 2 secondes pour une meilleure visualisation
                 timeout = setTimeout(() => {
-                    //console.log("START IA");
                     AIPlay();
                 }, 2000);
             }
 
-            // Empeche la soummission du formulaire
+            // Empeche la soummission du formulaire (raffraichissement de la page)
             event.preventDefault();
         });
 
-        // Initialisation du timer
+        // Initialisation du timer actualisé toute les secondes
         function initTimer(){
             return setInterval(() => {
                 let $timer = $('#timer');
                 sec--;
                 $timer.text(sec + " sec");
 
+                // Si le temps est écoulé, on change de joueur
                 if (sec < 0) {
                     sec = SEC_TIMER;
                     $timer.text(sec + " sec");
@@ -92,11 +162,10 @@ let virtualBoard,      // Plateau virtuel (graphe)
             }, 1000);
         }
 
-// Initialisation des écouteurs (MODIFIER TOUT POUR AVOIR UN MODELE ET UNE VUE)
+        // Initialisation des écouteurs des cases du plateau
         function initListeners(){
             // Listener sur les cases
             $plateau.find('button').on('click', function () {
-
                 // Fonction exécutée lors d'un click
                 if (playerCanClick) executeClick($(this).attr('id'));
             });
@@ -112,6 +181,6 @@ let virtualBoard,      // Plateau virtuel (graphe)
 - Bloquer les clicks quand une IA joue (désactiver complètement quand 2 IA jouent) OK
 - IA de niveau débutant : déplacements aléatoires OK
 - IA de niveau intermédiaire et expert (profondeur 1 et 3) OK
-- Sélection d'un algorithme de recherche de stratégie gagnante (radio buttons + gestion des choix)
+- Sélection d'un algorithme de recherche de stratégie gagnante (radio buttons + gestion des choix) OK
 - Zone d'information en rapport avec les IA et algos utilisés
  */

@@ -2,7 +2,7 @@
  * Fonctions relatives à la VUE (partie visuel du jeu) *
  *******************************************************/
 
-// Initialisation du plateau HTML
+// Initialisation du plateau HTML par rapport au règles d'Othello
 function initBoardView() {
     for (let i = 0; i < BOARD_SIZE; i++) {
         let $row = $('<tr></tr>').attr('id', "row" + i);
@@ -26,13 +26,13 @@ function initBoardView() {
     $('#currentPlayer').text(currentPlayer);
 }
 
-// Change la couleur d'un pion HTML
+// Change la couleur d'un pion HTML el par newState
 function toggleState(el, newState) {
     $(el).find('button').removeClass();
     $(el).find('button').addClass(newState);
 }
 
-// Fonctions mettant à jour la vue
+// Fonctions mettant à jour la vue (données du plateau + plateau lui-même)
 function updateBoardView(){
     for (let i = 0; i < BOARD_SIZE; ++i){
         for (let j = 0; j < BOARD_SIZE; ++j){
@@ -44,7 +44,7 @@ function updateBoardView(){
     $('#timer').text(sec + " sec");
 }
 
-// Actualise le nombre de pions blancs et noirs du graphe
+// Actualise le nombre de pions blanc et noir
 function updateNbPiecesView(){
     $('#nbBlackPieces').text(nbBlackPieces);
     $('#nbWhitePieces').text(nbWhitePieces);

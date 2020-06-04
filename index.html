@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Othello - Théorie des jeux</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script src="script.js"></script>
     <script src="model.js"></script>
@@ -18,7 +18,7 @@
         <form id="formstart" method="post" action="?">
             <div>
                 <fieldset>
-                    <legend>Mode de jeu</legend>
+                    <legend><b>Mode de jeu</b></legend>
 
                     <input type="radio" id="jvsj" name="mode" value="jvsj" checked>
                     <label for="jvsj">Joueur vs Joueur</label><br>
@@ -31,16 +31,75 @@
 
             <div id="diff" class="hidden">
                 <fieldset>
-                    <legend>Difficulté</legend>
+                    <legend><b>Difficulté</b></legend>
 
                     <input type="radio" id="easy" name="difficulte" value="easy" checked>
                     <label for="easy">Novice</label><br>
                     <input type="radio" id="medium" name="difficulte" value="medium">
                     <label for="medium">Moyen</label><br>
                     <input type="radio" id="hard" name="difficulte" value="hard">
-                    <label for="hard">Expérimenté</label><br>
+                    <label for="hard">Confirmé</label><br>
                 </fieldset>
             </div>
+
+            <div id="algojvsia" class="hidden">
+                <fieldset>
+                    <legend><b>Paramétrage de l'IA</b></legend>
+
+                    <p>Algorithme</p>
+                    <input type="radio" id="minimax" name="algorithme" value="minimax" checked>
+                    <label for="minimax">Minimax</label><br>
+                    <input type="radio" id="alphabeta" name="algorithme" value="alphabeta">
+                    <label for="alphabeta">AlphaBeta</label><br>
+                    <input type="radio" id="negalphabeta" name="algorithme" value="negalphabeta">
+                    <label for="negalphabeta">NegAlphaBeta</label>
+
+                    <p>Heuristique</p>
+                    <input type="radio" id="heurnbpion" name="heuristique" value="nbpion" checked>
+                    <label for="heurnbpion">Nombre de pions total</label><br>
+                    <input type="radio" id="heurmobi" name="heuristique" value="mobi">
+                    <label for="heurmobi">Nombre de pions ennemis capturés</label>
+                </fieldset>
+            </div>
+
+            <div id="algoiavsia" class="hidden">
+                <fieldset class="leftparam">
+                    <legend><b>Paramétrage de l'IA noire</b></legend>
+
+                    <p>Algorithme</p>
+                    <input type="radio" id="minimaxia1" name="algorithmeia1" value="minimax" checked>
+                    <label for="minimaxia1">Minimax</label><br>
+                    <input type="radio" id="alphabetaia1" name="algorithmeia1" value="alphabeta">
+                    <label for="alphabetaia1">AlphaBeta</label><br>
+                    <input type="radio" id="negalphabetaia1" name="algorithmeia1" value="negalphabeta">
+                    <label for="negalphabetaia1">NegAlphaBeta</label>
+
+                    <p>Heuristique</p>
+                    <input type="radio" id="heurnbpionia1" name="heuristiqueia1" value="nbpion" checked>
+                    <label for="heurnbpionia1">Nombre de pions total</label><br>
+                    <input type="radio" id="heurmobiia1" name="heuristiqueia1" value="mobi">
+                    <label for="heurmobiia1">Nombre de pions ennemis capturés</label>
+                </fieldset>
+
+                <fieldset>
+                    <legend><b>Paramétrage de l'IA blanche</b></legend>
+
+                    <p>Algorithme</p>
+                    <input type="radio" id="minimaxia2" name="algorithmeia2" value="minimax" checked>
+                    <label for="minimaxia2">Minimax</label><br>
+                    <input type="radio" id="alphabetaia2" name="algorithmeia2" value="alphabeta">
+                    <label for="alphabetaia2">AlphaBeta</label><br>
+                    <input type="radio" id="negalphabetaia2" name="algorithmeia2" value="negalphabeta">
+                    <label for="negalphabetaia2">NegAlphaBeta</label>
+
+                    <p>Heuristique</p>
+                    <input type="radio" id="heurnbpionia2" name="heuristiqueia2" value="nbpion" checked>
+                    <label for="heurnbpionia2">Nombre de pions total</label><br>
+                    <input type="radio" id="heurmobiia2" name="heuristiqueia2" value="mobi">
+                    <label for="heurmobiia2">Nombre de pions ennemis capturés</label>
+                </fieldset>
+            </div>
+
             <br>
             <button id="submit" type="submit">Jouer</button>
         </form>

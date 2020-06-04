@@ -4,13 +4,13 @@
 
 // Initialisation du plateau
 function initVirtualBoard(){
-    // Création
+    // Création du tableau à deux dimensions
     virtualBoard = new Array(BOARD_SIZE);
     for (let i = 0; i < virtualBoard.length; ++i){
         virtualBoard[i] = new Array(BOARD_SIZE);
     }
 
-    // Initialisation par rapport à la situation actuelle du jeu
+    // Initialisation par rapport aux règles d'Othello
     for (let i = 0; i < BOARD_SIZE; ++i){
         for (let j = 0; j < BOARD_SIZE; ++j){
             virtualBoard[i][j] = 'vide';
@@ -25,24 +25,27 @@ function initVirtualBoard(){
     possibleMoves = getPossibleMoves();
 }
 
-// Vérifie que les coordonnées sont dans le plateau
+// Vérifie que les coordonnées x et y sont dans le plateau
 function isInBoard(x, y) {
     return x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
 }
 
-// Modifie le joueur virtuel courant  ( A FAIRE : REVOIR LE CHANGEMENT DE JOUEUR AVEC IA QUAND IA GAGNE)
+// Modifie le joueur courant, y compris s'il s'agit d'une IA
+// isIA indique si le changement est réel ou un changement utilisé dans les algorithmes de recherche
 function swapPlayer(isIA){
     currentPlayer = currentPlayer === 'noir' ? 'blanc' : 'noir';
-    possibleMoves = getPossibleMoves();
+    possibleMoves = getPossibleMoves(); // Récupération des déplacements possibles par rapport au joueur courant
 
     // Si le joueur ne peut pas jouer et que l'autre peut continuer de jouer, on passe à l'autre
     if ($.isEmptyObject(possibleMoves)) {
         currentPlayer = currentPlayer === 'noir' ? 'blanc' : 'noir';
         possibleMoves = getPossibleMoves();
 
+        // Si l'autre joueur ne peut pas jouer non plus, la partie est finie
         if ($.isEmptyObject(possibleMoves)) gameOver = true;
     }
 
+    // Si le changement ert réel et que le mode de jeu est IA contre IA, l'IA courante devient le nouveau joueur obtenu au dessus
     if (!isIA && gameMode === 'iavsia') currentIA = currentPlayer;
 
     // Gestion des IAs
@@ -54,12 +57,10 @@ function swapPlayer(isIA){
             } else {
                 playerCanClick = true;
             }
-        }
-        //if (gameMode === 'jvsia' && currentPlayer === 'blanc') openAI = true;
-        else if (gameMode === 'iavsia') openAI = true;
+        } else if (gameMode === 'iavsia') openAI = true;
     }
 
-    // Si le joueur est une IA
+    // Si le changement est réel et que le joueur est une IA, on fait jouer l'IA
     if (openAI) {
         timeout = setTimeout(function () {
             //console.log("START IA");
@@ -68,7 +69,7 @@ function swapPlayer(isIA){
     }
 }
 
-// MAJ du nombre de pièces
+// MAJ du nombre de pièces pour chaque joueur
 function updateNbPieces(){
     nbBlackPieces = 0;
     nbWhitePieces = 0;
@@ -81,7 +82,7 @@ function updateNbPieces(){
     }
 }
 
-// Vérifie que des pions ennemis sont à proximité
+// Vérifie que des pions ennemis sont à proximité de la position de coordonnées row et col
 function isCloseEnemyPiece(row, col){
     let enemy = currentPlayer === 'blanc' ? 'noir' : 'blanc';
 
@@ -99,9 +100,10 @@ function isCloseEnemyPiece(row, col){
 function getPossibleMoves(){
     let moves = {};
 
+    // On recherche des déplacements possibles pour chaque case du plateau
     for (let row = 0; row < BOARD_SIZE; row++) {
         for (let col = 0; col < BOARD_SIZE; col++) {
-            // On regarde si la position est propice à la pose d'un pion
+            // On regarde si la position est propice à la pose d'un pion (vide et à proximité de pions ennemis)
             if (virtualBoard[row][col] === 'vide' && isCloseEnemyPiece(row, col)) {
                 let coords = [];
                 let temp;
@@ -235,7 +237,7 @@ function getPossibleMoves(){
     return moves;
 }
 
-// Effectue un déplacement
+// Effectue un déplacement moveKey à partir de la case d'identifiant
 function makeMove(moveKey, isIA) {
     let coords = moveKey.split('x');
 
@@ -253,39 +255,42 @@ function makeMove(moveKey, isIA) {
     // MAJ du nombre de pièces
     updateNbPieces();
 
+    // Vérification du statut de la partie
     if (gameIsOver()) gameOver = true;
 
+    // Changement de joueur
     swapPlayer(isIA);
 }
 
-// Retourne à un état du plateau
+// Le jeu retourne à un état précédent en remettant les données globales avec celles en paramètre
 function unmakeMove(state, moves, over, player){
-    virtualBoard = JSON.parse(JSON.stringify(state));  // Deep copy
-    possibleMoves = JSON.parse(JSON.stringify(moves)); // Deep copy
+    virtualBoard = JSON.parse(JSON.stringify(state));
+    possibleMoves = JSON.parse(JSON.stringify(moves));
     lastPossibleMoves = JSON.parse(JSON.stringify(possibleMoves));
     gameOver = over;
     currentPlayer = player;
     updateNbPieces();
 }
 
-// Retourne si la partie doit se finir
+// Vérifie si la partie est finie (
 function gameIsOver(){
     return (nbBlackPieces === 0 || nbWhitePieces === 0) || (nbWhitePieces + nbBlackPieces === 64);
 }
 
 // Met fin au jeu
 function endGame(){
-    clearInterval(timer);
-    $('#timer').text("-- sec");
+    clearInterval(timer); // Suppression du timer
+    $('#timer').text("-- sec"); // Réinitialistion du temps affiché
+    // Popup indiquant que la partie est finie
     alert("Partie terminée, le gagnant est le joueur " + ((nbWhitePieces > nbBlackPieces) ? "blanc" : "noir"));
 }
 
-// Fonction appelée lors d'un click
+// Fonction exécutée à la suite d'un clic où id est un déplacement
 function executeClick(id){
     if (id in possibleMoves){
         // Application du déplacement
         makeMove(id, false);
-        sec = SEC_TIMER;
+        sec = SEC_TIMER; // Réinitialisation du temps restant
 
         // MAJ de la vue
         updateBoardView();
@@ -293,10 +298,6 @@ function executeClick(id){
 
         // Vérification de la fin de partie
         if (gameOver) endGame();
-
-        // Reset du timer
-        //clearInterval(timer);
-        //timer = initTimer();
     }
 }
 
@@ -310,20 +311,44 @@ function AIPlay(){
     // Gère l'accès à cette même méthode
     openAI = false;
 
-    // Application d'algorithme de recherche en fonction de la difficulté
+    // Application d'algorithme de recherche en fonction du mode de jeu et de la difficulté
     let result;
     if (difficulty === 'easy') {
         moveAI = randomMove();
     } else if (difficulty === 'medium'){
-        //result = minimax(1, 'MAX');
-        result = alphaBeta(1, -Infinity, Infinity, "MAX");
-        //result = negAlphaBeta(1, -Infinity, Infinity);
+        if (gameMode === 'jvsia') {
+            if (algorithm1 === 'minimax') result = minimax(1, 'MAX');
+            else if (algorithm1 === 'alphabeta') result = alphaBeta(1, -Infinity, Infinity, "MAX");
+            else if (algorithm1 === 'negalphabeta') result = negAlphaBeta(1, -Infinity, Infinity);
+        } else if (gameMode === 'iavsia'){
+            if (currentIA === 'noir'){
+                if (algorithm1 === 'minimax') result = minimax(1, 'MAX');
+                else if (algorithm1 === 'alphabeta') result = alphaBeta(1, -Infinity, Infinity, "MAX");
+                else if (algorithm1 === 'negalphabeta') result = negAlphaBeta(1, -Infinity, Infinity);
+            } else {
+                if (algorithm2 === 'minimax') result = minimax(1, 'MAX');
+                else if (algorithm2 === 'alphabeta') result = alphaBeta(1, -Infinity, Infinity, "MAX");
+                else if (algorithm2 === 'negalphabeta') result = negAlphaBeta(1, -Infinity, Infinity);
+            }
+        }
     } else {
-        result = minimax(3, 'MAX');
-        result = alphaBeta(3, -Infinity, Infinity, "MAX");
-        //result = negAlphaBeta(3, -Infinity, Infinity);
+        if (gameMode === 'jvsia'){
+            if (algorithm1 === 'minimax') result = minimax(3, 'MAX');
+            else if (algorithm1 === 'alphabeta') result = alphaBeta(3, -Infinity, Infinity, "MAX");
+            else if (algorithm1 === 'negalphabeta') result = negAlphaBeta(3, -Infinity, Infinity);
+        } else if (gameMode === 'iavsia'){
+            if (currentIA === 'noir'){
+                if (algorithm1 === 'minimax') result = minimax(3, 'MAX');
+                else if (algorithm1 === 'alphabeta') result = alphaBeta(3, -Infinity, Infinity, "MAX");
+                else if (algorithm1 === 'negalphabeta') result = negAlphaBeta(3, -Infinity, Infinity);
+            } else {
+                if (algorithm2 === 'minimax') result = minimax(3, 'MAX');
+                else if (algorithm2 === 'alphabeta') result = alphaBeta(3, -Infinity, Infinity, "MAX");
+                else if (algorithm2 === 'negalphabeta') result = negAlphaBeta(3, -Infinity, Infinity);
+            }
+        }
     }
 
-    // Exécution d'un click correspondant au déplacement obtenu
+    // Exécution d'un clic correspondant au déplacement obtenu
     executeClick(moveAI);
 }
