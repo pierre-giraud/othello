@@ -1,6 +1,8 @@
+// Constantes
 const BOARD_SIZE = 8,  // Dimension du plateau
-    SEC_TIMER = 10;  // Temps initial du timer
+    SEC_TIMER = 200;    // Temps initial du timer
 
+// Variables globales
 let $plateau,                     // Element plateau
     gameMode,                     // Mode de jeu
     gameOver,                     // La partie est finie ?
@@ -14,11 +16,12 @@ let $plateau,                     // Element plateau
 
 // Variables concernant les IA
 let virtualBoard,      // Plateau virtuel (graphe)
+    positionValues,    // Tableau de valeurs des positions (heuristique)
     difficulty,        // Niveau de difficulté des IA
-    algorithm1,        // Algorithme utilisé pour l'ia 1
-    algorithm2,        // Algorithme utilisé pour l'ia 2
-    heuristique1,      // Heuristique utilisé pour l'ia 1
-    heuristique2,      // Heuristique utilisé pour l'ia 2
+    algorithm1,        // Algorithme utilisé pour l'IA 1
+    algorithm2,        // Algorithme utilisé pour l'IA 2
+    heuristique1,      // Heuristique utilisé pour l'IA 1
+    heuristique2,      // Heuristique utilisé pour l'IA 2
     currentIA,         // IA en train de jouer (noir | blanc)
     openAI,
     moveAI,            // Meilleur déplacement possible pour l'IA en train de jouer
@@ -116,6 +119,9 @@ let virtualBoard,      // Plateau virtuel (graphe)
 
             $('#welcomediv').addClass('hidden');
             $('#game').removeClass('hidden');
+
+            // Si un heuristique de valeur de positions est utilisé, on initialise le tableau des valeurs du plateau
+            if (heuristique1 === 'valpos' || heuristique2 === 'valpos') initPositionValues();
 
             initVirtualBoard();   // Initialisation du modèle
             initBoardView();      // Initialisation de la vue

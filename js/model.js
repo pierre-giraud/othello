@@ -263,12 +263,13 @@ function makeMove(moveKey, isIA) {
 }
 
 // Le jeu retourne à un état précédent en remettant les données globales avec celles en paramètre
-function unmakeMove(state, moves, over, player){
+function unmakeMove(state, moves, over, player, lastmove){
     virtualBoard = JSON.parse(JSON.stringify(state));
     possibleMoves = JSON.parse(JSON.stringify(moves));
     lastPossibleMoves = JSON.parse(JSON.stringify(possibleMoves));
     gameOver = over;
     currentPlayer = player;
+    lastMove = lastmove;
     updateNbPieces();
 }
 
