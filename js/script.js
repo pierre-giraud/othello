@@ -1,6 +1,6 @@
 // Constantes
 const BOARD_SIZE = 8,  // Dimension du plateau
-    SEC_TIMER = 200;    // Temps initial du timer
+    SEC_TIMER = 20;    // Temps initial du timer
 
 // Variables globales
 let $plateau,                     // Element plateau
