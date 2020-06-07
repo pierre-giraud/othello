@@ -19,11 +19,11 @@ function minimax(depth, node){
     }
 
     // Enregistre l'état actuel du jeu à chaque étape de l'algorithme afin d'affectuer plus tard le retour arrière
-    let initialState = JSON.parse(JSON.stringify(virtualBoard));
-    let initialPMoves = JSON.parse(JSON.stringify(possibleMoves));
-    let initialGameOver = gameOver;
-    let initialPlayer = currentPlayer;
-    let initialMove = lastMove;
+    let initialState = JSON.parse(JSON.stringify(virtualBoard));   // Sauvegarde de l'état actuel du plateau (avant déplacement)
+    let initialPMoves = JSON.parse(JSON.stringify(possibleMoves)); // Sauvegarde des déplacements possibles
+    let initialGameOver = gameOver;                                // Sauvegarde de l'état du jeu (si le jeu est fini ou non)
+    let initialPlayer = currentPlayer;                             // Sauvegarde du joueur courant
+    let initialMove = lastMove;                                    // Sauvegarde du dernier déplacement
     lastPossibleMoves = JSON.parse(JSON.stringify(initialPMoves));
 
     let bestScore; // Meilleur score obtenu (nombre de pions)

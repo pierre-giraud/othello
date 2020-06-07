@@ -178,15 +178,3 @@ let virtualBoard,      // Plateau virtuel (graphe)
         }
     });
 })(jQuery);
-
-// Difficultés
-// 1. Implémentation des algos (fonctions makeMove et unmake à adapter)
-// 2. Gestion des joueurs + données durant les calculs d'une IA
-
-/* A Faire
-- Bloquer les clicks quand une IA joue (désactiver complètement quand 2 IA jouent) OK
-- IA de niveau débutant : déplacements aléatoires OK
-- IA de niveau intermédiaire et expert (profondeur 1 et 3) OK
-- Sélection d'un algorithme de recherche de stratégie gagnante (radio buttons + gestion des choix) OK
-- Zone d'information en rapport avec les IA et algos utilisés
- */
