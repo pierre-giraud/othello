@@ -8,10 +8,8 @@ plateau de jeu et peut poser des pions lorsque c'est son tour.
 
 ## Développement
 
-Ce projet a été réalisé à l'aide des langages HTML et CSS ainsi que [jQuery](https://jquery.com/) pour les 
+Ce projet a été réalisé à l'aide des langages HTML et SCSS ainsi que [jQuery](https://jquery.com/) pour les 
 interactions avec le plateau.
-
-L'interface utilisateur a été réalisée à l'aide de la bibliothèque CSS [Bulma](https://bulma.io/).
 
 ## Description fonctionnelle
 
